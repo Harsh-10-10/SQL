@@ -1,0 +1,45 @@
+icao24 - Unique 24-bit ICAO aircraft address (hex string). Identifies the aircraft globally.
+callsign- Aircraft's flight number or call sign (e.g., "AI202"). May be empty or null.
+origin_country - Country where the aircraft is registered.
+time_position - Unix timestamp (seconds) when the last position was received.
+last_contact - Unix timestamp of the last received message from the aircraft.
+longitude - Aircraft's longitude (decimal degrees).
+latitude - Aircraft's latitude (decimal degrees).
+baro_altitude - Altitude based on barometric pressure (in meters).
+on_ground- True[1] if the aircraft is on the ground; False[2] if airborne.
+velocity - Aircraft's speed over ground (in m/s).
+true_track -Aircraft's heading (degrees from north).
+vertical_rate - Rate of climb or descent (in m/s).
+sensors	TEXT - IDs used to receive the aircraft's data. Often null or unused.
+geo_altitude - Altitude based on geometric calculations (in meters).
+squawk	- 4-digit transponder code used by ATC to identify the aircraft.
+spi- Special Position Indicator. True if the aircraft is transmitting emergency or special signals.
+
+
+CREATE TABLE IF NOT EXISTS opensky_data (
+    icao24 TEXT NOT NULL,                      -- Unique aircraft ID, must be present
+    callsign TEXT,                             -- Optional, may be null
+    origin_country TEXT NOT NULL,              -- Country of registration, must be present
+    time_position INTEGER,                     -- Timestamp of last position, can be null
+    last_contact INTEGER NOT NULL,             -- Timestamp of last contact, must be present
+    longitude REAL CHECK(longitude BETWEEN -180 AND 180),  -- Valid longitude range
+    latitude REAL CHECK(latitude BETWEEN -90 AND 90),      -- Valid latitude range
+    baro_altitude REAL,                        -- Optional altitude
+    on_ground BOOLEAN NOT NULL CHECK(on_ground IN (0, 1)), -- Must be true or false
+    velocity REAL CHECK(velocity >= 0),        -- Speed must be non-negative
+    true_track REAL CHECK(true_track BETWEEN 0 AND 360),   -- Heading in degrees
+    vertical_rate REAL,                        -- Optional climb/descent rate
+    sensors TEXT,                              -- Optional sensor info
+    geo_altitude REAL,                         -- Optional geometric altitude
+    squawk TEXT,                               -- Optional transponder code
+    spi BOOLEAN NOT NULL CHECK(spi IN (0, 1)), -- Emergency signal flag
+    position_source INTEGER CHECK(position_source IN (0, 1, 2)), -- Valid source codes
+    fetch_time TEXT NOT NULL,                  -- Timestamp of data fetch
+    PRIMARY KEY (icao24, time_position)
+);
+
+
+
+
+
+
